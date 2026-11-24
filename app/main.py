@@ -21,12 +21,12 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-import streamlit as st  # noqa: E402  (import after sys.path bootstrap)
+import streamlit as st
 
-from app.context import get_config, open_repo  # noqa: E402
-from app.pages import browser, overview, placeholder  # noqa: E402
-from app.ui_utils import human_bytes  # noqa: E402
-from core.scanner import scan_dataset  # noqa: E402
+from app.context import get_config, open_repo
+from app.pages import browser, overview, placeholder
+from app.ui_utils import human_bytes
+from core.scanner import scan_dataset
 
 PAGE_ORDER = [
     "Overview",
