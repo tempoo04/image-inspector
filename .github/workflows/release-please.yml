@@ -1,0 +1,21 @@
+name: release-please
+
+# Maintains a release PR that accumulates changes; merging it tags a release,
+# updates CHANGELOG.md, and bumps the version. Version tags then trigger the
+# Docker publish workflow.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
