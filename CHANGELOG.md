@@ -1,0 +1,16 @@
+# Changelog
+
+## [0.2.0](https://github.com/tempoo04/image-inspector/compare/vision-dataset-explorer-v0.1.0...vision-dataset-explorer-v0.2.0) (2026-11-24)
+
+
+### Features
+
+* add 'Generate demo dataset' button and Streamlit theme ([1239a2c](https://github.com/tempoo04/image-inspector/commit/1239a2cfbd167f9e0d44932c89d1fbe35ef1f4d1))
+* add 'Generate demo dataset' button and Streamlit theme ([d9ae503](https://github.com/tempoo04/image-inspector/commit/d9ae503b7ad927bbdec981f5f1c864b5bbcf36b7))
+
+
+### Documentation
+
+* add issue/PR templates, CODEOWNERS, and CONTRIBUTING guide ([bbaa237](https://github.com/tempoo04/image-inspector/commit/bbaa23781565dcb240004e6bb427f3522ef46386))
+* add README status badges and MIT LICENSE file ([9b1d36b](https://github.com/tempoo04/image-inspector/commit/9b1d36b67b169e3bb51f872486b0f299354ebd9c))
+* track planned features in issues instead of README table ([9745471](https://github.com/tempoo04/image-inspector/commit/974547133b5f0a00aef1a3f8ae8390d1d1aa617f))
