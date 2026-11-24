@@ -1,5 +1,12 @@
 # Vision Dataset Explorer
 
+[![CI](https://github.com/tempoo04/image-inspector/actions/workflows/ci.yml/badge.svg)](https://github.com/tempoo04/image-inspector/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/tempoo04/image-inspector/actions/workflows/codeql.yml/badge.svg)](https://github.com/tempoo04/image-inspector/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/tempoo04/image-inspector/branch/main/graph/badge.svg)](https://codecov.io/gh/tempoo04/image-inspector)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 A local-first, interactive application for exploring, analyzing, comparing, and
 cleaning large image datasets. Built for computer-vision researchers, ML
 engineers, and data scientists. Everything runs on your machine — no cloud, no
