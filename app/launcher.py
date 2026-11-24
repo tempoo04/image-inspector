@@ -52,12 +52,21 @@ def _run_scan(root: Path, db_path: Path, prune: bool) -> int:
 
 
 def _run_ui() -> int:
-    print(
-        "The Streamlit UI arrives in Milestone 2.\n"
-        "For now, index a dataset with:  python -m app.launcher --scan <dir>",
-        file=sys.stderr,
-    )
-    return 1
+    """Launch the Streamlit interface via `streamlit run app/main.py`."""
+    import subprocess
+
+    main_py = Path(__file__).with_name("main.py")
+    try:
+        return subprocess.call(
+            [sys.executable, "-m", "streamlit", "run", str(main_py)]
+        )
+    except FileNotFoundError:
+        print(
+            "Streamlit is not installed. Install core dependencies first:\n"
+            "    pip install -r requirements.txt",
+            file=sys.stderr,
+        )
+        return 1
 
 
 def main(argv: list[str] | None = None) -> int:

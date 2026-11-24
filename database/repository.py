@@ -195,3 +195,122 @@ class Repository:
             sql += " LIMIT ? OFFSET ?"
             params = [limit, offset]
         return self._conn.execute(sql, params).fetchall()
+
+    # -- browser: filtering, sorting, pagination (Module B) ------------------
+    # Whitelist of sortable expressions; keys are the only values accepted from
+    # the UI, so untrusted input can never reach the SQL string.
+    _SORT_EXPR = {
+        "name": "rel_path",
+        "date": "mtime",
+        "size": "size_bytes",
+        "resolution": "(COALESCE(width, 0) * COALESCE(height, 0))",
+    }
+
+    def _build_filters(self, f: dict | None) -> tuple[str, list]:
+        """Translate a filter dict into a WHERE clause and bind parameters.
+
+        Recognized keys (all optional): ``class_label`` (str, or the sentinel
+        ``"__flat__"`` for NULL class), ``exts`` (list[str]), ``filename``
+        (substring), ``min_width``/``max_width``, ``min_height``/``max_height``,
+        ``min_size``/``max_size``, ``min_aspect``/``max_aspect``,
+        ``include_corrupt`` (bool, default True).
+        """
+        f = f or {}
+        clauses: list[str] = []
+        params: list = []
+
+        if not f.get("include_corrupt", True):
+            clauses.append("corrupt = 0")
+
+        cls = f.get("class_label")
+        if cls == "__flat__":
+            clauses.append("class_label IS NULL")
+        elif cls:
+            clauses.append("class_label = ?")
+            params.append(cls)
+
+        exts = f.get("exts")
+        if exts:
+            placeholders = ",".join("?" for _ in exts)
+            clauses.append(f"ext IN ({placeholders})")
+            params.extend(exts)
+
+        if name := f.get("filename"):
+            clauses.append("filename LIKE ?")
+            params.append(f"%{name}%")
+
+        for key, col, op in (
+            ("min_width", "width", ">="), ("max_width", "width", "<="),
+            ("min_height", "height", ">="), ("max_height", "height", "<="),
+            ("min_size", "size_bytes", ">="), ("max_size", "size_bytes", "<="),
+            ("min_aspect", "aspect_ratio", ">="), ("max_aspect", "aspect_ratio", "<="),
+        ):
+            val = f.get(key)
+            if val is not None:
+                clauses.append(f"{col} {op} ?")
+                params.append(val)
+
+        where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+        return where, params
+
+    def list_images(
+        self,
+        filters: dict | None = None,
+        sort: str = "name",
+        descending: bool = False,
+        limit: int = 60,
+        offset: int = 0,
+    ) -> tuple[list[sqlite3.Row], int]:
+        """Return a page of images plus the total matching count.
+
+        *sort* must be one of ``_SORT_EXPR``; unknown values fall back to name.
+        """
+        where, params = self._build_filters(filters)
+        total = int(
+            self._conn.execute(
+                f"SELECT COUNT(*) AS n FROM images{where}", params
+            ).fetchone()["n"]
+        )
+        order_expr = self._SORT_EXPR.get(sort, self._SORT_EXPR["name"])
+        direction = "DESC" if descending else "ASC"
+        rows = self._conn.execute(
+            f"SELECT * FROM images{where} ORDER BY {order_expr} {direction}, id "
+            f"LIMIT ? OFFSET ?",
+            [*params, limit, offset],
+        ).fetchall()
+        return rows, total
+
+    def distinct_exts(self) -> list[str]:
+        rows = self._conn.execute(
+            "SELECT DISTINCT ext FROM images ORDER BY ext"
+        ).fetchall()
+        return [r["ext"] for r in rows]
+
+    def count_by_ext(self) -> list[tuple[str, int]]:
+        """Return ``(ext, count)`` pairs for the format distribution chart."""
+        rows = self._conn.execute(
+            "SELECT ext, COUNT(*) AS n FROM images GROUP BY ext ORDER BY n DESC"
+        ).fetchall()
+        return [(r["ext"], r["n"]) for r in rows]
+
+    def value_ranges(self) -> dict[str, tuple]:
+        """Min/max of numeric fields for building filter widgets.
+
+        Returns ``{}`` when the catalog is empty so callers can show an empty
+        state instead of rendering sliders with null bounds.
+        """
+        row = self._conn.execute(
+            "SELECT MIN(width) AS wmin, MAX(width) AS wmax, "
+            "MIN(height) AS hmin, MAX(height) AS hmax, "
+            "MIN(size_bytes) AS smin, MAX(size_bytes) AS smax, "
+            "MIN(aspect_ratio) AS amin, MAX(aspect_ratio) AS amax "
+            "FROM images WHERE corrupt = 0"
+        ).fetchone()
+        if row is None or row["wmin"] is None:
+            return {}
+        return {
+            "width": (row["wmin"], row["wmax"]),
+            "height": (row["hmin"], row["hmax"]),
+            "size": (row["smin"], row["smax"]),
+            "aspect": (row["amin"], row["amax"]),
+        }
