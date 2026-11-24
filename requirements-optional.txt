@@ -1,0 +1,16 @@
+# Optional dependencies for advanced modules.
+# App runs without these; features degrade gracefully when absent.
+
+# Embedding extraction (Module G)
+torch>=2.2
+timm>=0.9
+
+# Fast similarity search (optional backend for duplicates / embeddings)
+faiss-cpu>=1.8
+
+# Dimensionality reduction for embedding visualization
+scikit-learn>=1.4
+umap-learn>=0.5
+
+# PDF report generation (Module H)
+reportlab>=4.1

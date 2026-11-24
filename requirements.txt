@@ -1,0 +1,11 @@
+# Core (required to run the app)
+streamlit>=1.32
+opencv-python-headless>=4.9
+Pillow>=10.2
+numpy>=1.26
+pandas>=2.2
+plotly>=5.20
+
+# Optional: embeddings + advanced similarity.
+# Install with:  pip install -r requirements-optional.txt
+# torch, timm, faiss-cpu, umap-learn, scikit-learn, reportlab
