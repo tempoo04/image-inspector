@@ -1,11 +1,21 @@
 name: Publish Docker image
 
-# Builds the Dockerfile and pushes to GitHub Container Registry (GHCR) when a
-# version tag is pushed (release-please creates these), or on manual dispatch.
+# Builds the Dockerfile and pushes to GitHub Container Registry (GHCR).
+# Triggered by the release-please workflow when a release is cut (same workflow
+# run, so GITHUB_TOKEN can trigger it), or manually for a specific tag.
 on:
-  push:
-    tags: ["v*.*.*"]
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref (tag) to build and tag the image from.
+        required: false
+        type: string
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref/tag to build (e.g. v0.2.0). Blank builds the default branch.
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -16,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       - uses: docker/setup-buildx-action@v3
 
@@ -32,8 +44,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}},value=${{ inputs.ref }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.ref }}
             type=raw,value=latest
 
       - name: Build and push
