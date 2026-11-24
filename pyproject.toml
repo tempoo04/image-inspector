@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 readme = "README.md"
 license = { text = "MIT" }
 dependencies = [
-    "streamlit>=1.32",
+    "streamlit>=1.49",
     "opencv-python-headless>=4.9",
     "Pillow>=10.2",
     "numpy>=1.26",

@@ -5,8 +5,9 @@ cleaning large image datasets. Built for computer-vision researchers, ML
 engineers, and data scientists. Everything runs on your machine — no cloud, no
 uploads.
 
-> **Status:** Foundation complete (scanner + SQLite indexing + tests). UI and
-> later features are in progress — tracked in the
+> **Status:** Runnable. Scanner + SQLite indexing and the interactive browser
+> (thumbnail grid, filtering, sorting, pagination, detail view) are done.
+> Remaining analysis modules are tracked in the
 > [issue tracker](https://github.com/tempoo04/image-inspector/issues).
 
 ## Architecture
@@ -54,8 +55,14 @@ Requires Python 3.11+.
 Generate a synthetic sample dataset and index it:
 
 ```bash
+# 1. Generate a sample dataset (or point the app at your own)
 python -m examples.make_synthetic --out data/sample --per-class 20
-python -m app.launcher --scan data/sample        # (CLI index; UI arrives in M2)
+
+# 2a. Launch the interactive app, then enter a directory and click "Scan"
+streamlit run app/main.py
+
+# 2b. …or index from the command line without the UI
+python -m app.launcher --scan data/sample
 ```
 
 ## Running tests
@@ -70,7 +77,7 @@ pytest
 The project is built in incremental, independently testable stages:
 
 1. **Foundation** — project structure, dataset scanner, SQLite indexing, tests. ✅
-2. **Browser** — Streamlit UI, thumbnail cache, pagination, filtering, sorting.
+2. **Browser** — Streamlit UI, thumbnail cache, pagination, filtering, sorting. ✅
 3. **Statistics & quality** — image metrics, interactive charts, batch processing.
 4. **Comparison & duplicates** — side-by-side view, exact + perceptual hashing.
 5. **Embeddings** — optional deep features, PCA/UMAP, similarity search.
