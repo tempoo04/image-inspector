@@ -6,7 +6,7 @@ be used safely from any module (core, services, UI, tests).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 # --- Supported image formats -------------------------------------------------

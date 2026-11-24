@@ -6,11 +6,15 @@
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://image-inspector.streamlit.app/)
 
 A local-first, interactive application for exploring, analyzing, comparing, and
 cleaning large image datasets. Built for computer-vision researchers, ML
 engineers, and data scientists. Everything runs on your machine — no cloud, no
 uploads.
+
+**▶️ Live demo: https://image-inspector.streamlit.app/** — open it and click
+*Generate demo dataset* in the sidebar to explore a sample.
 
 > **Status:** Runnable. Scanner + SQLite indexing and the interactive browser
 > (thumbnail grid, filtering, sorting, pagination, detail view) are done.
