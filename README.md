@@ -5,21 +5,9 @@ cleaning large image datasets. Built for computer-vision researchers, ML
 engineers, and data scientists. Everything runs on your machine — no cloud, no
 uploads.
 
-> **Status:** Milestone 1 complete (scanner + SQLite indexing + tests). UI and
-> later modules are in progress. See [Roadmap](#roadmap).
-
-## Features (planned)
-
-| Module | Capability | Status |
-|--------|------------|--------|
-| A | Dataset scanner & SQLite indexer (class-based + flat, incremental) | ✅ M1 |
-| B | Thumbnail browser: grid, pagination, filter, sort, detail view | ⏳ M2 |
-| C | Statistics dashboard with interactive Plotly charts + CSV export | ⏳ M3 |
-| D | Image quality metrics (brightness, sharpness, entropy, flags) | ⏳ M3 |
-| E | Side-by-side comparison, histograms, pixel diff | ⏳ M4 |
-| F | Duplicate detection (sha256 + perceptual hash + embeddings) | ⏳ M4 |
-| G | Embedding visualization (ResNet/DINOv2, PCA/UMAP, similarity) | ⏳ M5 |
-| H | Dataset cleaning & export (filtered copies, CSV, PDF reports) | ⏳ M6 |
+> **Status:** Foundation complete (scanner + SQLite indexing + tests). UI and
+> later features are in progress — tracked in the
+> [issue tracker](https://github.com/tempoo04/image-inspector/issues).
 
 ## Architecture
 
@@ -88,7 +76,8 @@ The project is built in incremental, independently testable stages:
 5. **Embeddings** — optional deep features, PCA/UMAP, similarity search.
 6. **Export** — filtered dataset copies, CSV/PDF reports, cross-platform checks.
 
-Contributions are welcome at any stage — see the module table above for scope.
+Contributions are welcome at any stage — see the
+[open issues](https://github.com/tempoo04/image-inspector/issues) for scope.
 
 ## License
 
