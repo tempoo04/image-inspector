@@ -38,8 +38,9 @@ def _run_scan(root: Path, db_path: Path, prune: bool) -> int:
             print(f"\rScanning... {pct:3d}%  ({done}/{total})", end="", flush=True)
 
     with Repository(db_path) as repo:
-        res = scan_dataset(root, repo, batch_size=cfg.scan_batch_size,
-                           prune_missing=prune, progress_cb=progress)
+        res = scan_dataset(
+            root, repo, batch_size=cfg.scan_batch_size, prune_missing=prune, progress_cb=progress
+        )
     print()  # newline after progress line
     print(
         f"Layout: {res.layout}\n"
@@ -57,9 +58,7 @@ def _run_ui() -> int:
 
     main_py = Path(__file__).with_name("main.py")
     try:
-        return subprocess.call(
-            [sys.executable, "-m", "streamlit", "run", str(main_py)]
-        )
+        return subprocess.call([sys.executable, "-m", "streamlit", "run", str(main_py)])
     except FileNotFoundError:
         print(
             "Streamlit is not installed. Install core dependencies first:\n"

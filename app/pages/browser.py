@@ -18,7 +18,10 @@ from database.repository import Repository
 
 _GRID_COLS = 5
 _SORT_LABELS = {
-    "name": "Name", "date": "Date modified", "size": "File size", "resolution": "Resolution",
+    "name": "Name",
+    "date": "Date modified",
+    "size": "File size",
+    "resolution": "Resolution",
 }
 
 
@@ -29,8 +32,9 @@ def _int_range(label: str, lo: int, hi: int, *, step: int = 1, fmt=str):
     """
     if lo is None or hi is None or lo >= hi:
         return None
-    val = st.slider(label, min_value=int(lo), max_value=int(hi),
-                    value=(int(lo), int(hi)), step=step)
+    val = st.slider(
+        label, min_value=int(lo), max_value=int(hi), value=(int(lo), int(hi)), step=step
+    )
     if val == (int(lo), int(hi)):
         return None  # full range selected -> no filter
     return val
@@ -74,15 +78,19 @@ def _filter_controls(repo: Repository) -> tuple[dict, str, bool]:
             with rc[1]:
                 h = _int_range("Height (px)", *ranges["height"])
             with rc[2]:
-                kb = _int_range("Size (KB)", ranges["size"][0] // 1024,
-                                max(ranges["size"][1] // 1024, 1))
+                kb = _int_range(
+                    "Size (KB)", ranges["size"][0] // 1024, max(ranges["size"][1] // 1024, 1)
+                )
             with rc[3]:
                 amin, amax = ranges["aspect"]
                 a = None
                 if amin is not None and amax is not None and amin < amax:
-                    av = st.slider("Aspect ratio", float(round(amin, 2)),
-                                   float(round(amax, 2)),
-                                   (float(round(amin, 2)), float(round(amax, 2))))
+                    av = st.slider(
+                        "Aspect ratio",
+                        float(round(amin, 2)),
+                        float(round(amax, 2)),
+                        (float(round(amin, 2)), float(round(amax, 2))),
+                    )
                     if av != (float(round(amin, 2)), float(round(amax, 2))):
                         a = av
             if w:
@@ -96,8 +104,9 @@ def _filter_controls(repo: Repository) -> tuple[dict, str, bool]:
 
         # Sort + corrupt toggle
         sc = st.columns([2, 1, 2])
-        sort_key = sc[0].selectbox("Sort by", list(_SORT_LABELS),
-                                   format_func=lambda k: _SORT_LABELS[k])
+        sort_key = sc[0].selectbox(
+            "Sort by", list(_SORT_LABELS), format_func=lambda k: _SORT_LABELS[k]
+        )
         descending = sc[1].checkbox("Desc")
         show_corrupt = sc[2].checkbox("Show corrupt images", value=False)
         filters["include_corrupt"] = show_corrupt
@@ -130,17 +139,19 @@ def _render_detail(repo: Repository, cfg: AppConfig, image_id: int) -> None:
                 st.error(f"Could not display image: {exc}")
     with meta_col:
         st.markdown("**Metadata**")
-        st.table({
-            "Class": class_display(row["class_label"]),
-            "Path": row["rel_path"],
-            "Format": row["ext"],
-            "Dimensions": f"{row['width']}×{row['height']}" if row["width"] else "—",
-            "Mode": row["mode"] or "—",
-            "Aspect ratio": f"{row['aspect_ratio']:.3f}" if row["aspect_ratio"] else "—",
-            "File size": human_bytes(row["size_bytes"]),
-            "Modified": human_time(row["mtime"]),
-            "Corrupt": "yes" if row["corrupt"] else "no",
-        })
+        st.table(
+            {
+                "Class": class_display(row["class_label"]),
+                "Path": row["rel_path"],
+                "Format": row["ext"],
+                "Dimensions": f"{row['width']}×{row['height']}" if row["width"] else "—",
+                "Mode": row["mode"] or "—",
+                "Aspect ratio": f"{row['aspect_ratio']:.3f}" if row["aspect_ratio"] else "—",
+                "File size": human_bytes(row["size_bytes"]),
+                "Modified": human_time(row["mtime"]),
+                "Corrupt": "yes" if row["corrupt"] else "no",
+            }
+        )
 
 
 def render(repo: Repository, cfg: AppConfig) -> None:
@@ -165,8 +176,9 @@ def render(repo: Repository, cfg: AppConfig) -> None:
 
     page_size = cfg.browser_page_size
     page = st.session_state.get("browser_page", 0)
-    rows, total = repo.list_images(filters, sort=sort_key, descending=descending,
-                                   limit=page_size, offset=page * page_size)
+    rows, total = repo.list_images(
+        filters, sort=sort_key, descending=descending, limit=page_size, offset=page * page_size
+    )
     pages = max(1, math.ceil(total / page_size))
 
     selected: set = st.session_state.setdefault("selected_ids", set())
@@ -201,7 +213,7 @@ def render(repo: Repository, cfg: AppConfig) -> None:
             else:
                 thumb = thumbs.get_thumbnail(row["abs_path"], row["mtime"])
                 if thumb is not None:
-                    st.image(str(thumb), width='stretch')
+                    st.image(str(thumb), width="stretch")
                 else:
                     st.caption("⚠️ thumbnail failed")
                 st.caption(f"{row['filename']}  ·  {row['width']}×{row['height']}")

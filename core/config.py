@@ -39,21 +39,21 @@ class QualityThresholds:
     and channel means are on a 0-255 scale; sharpness is variance-of-Laplacian.
     """
 
-    dark_mean_max: float = 25.0          # <= flagged "too dark"
-    bright_mean_min: float = 230.0       # >= flagged "too bright"
-    black_mean_max: float = 2.0          # <= flagged "effectively black"
-    white_mean_min: float = 253.0        # >= flagged "effectively white"
-    blur_laplacian_max: float = 100.0    # < flagged "blurry"
-    low_entropy_max: float = 1.0         # < flagged "low information"
-    min_dimension_px: int = 32           # min(width,height) < flagged "too small"
+    dark_mean_max: float = 25.0  # <= flagged "too dark"
+    bright_mean_min: float = 230.0  # >= flagged "too bright"
+    black_mean_max: float = 2.0  # <= flagged "effectively black"
+    white_mean_min: float = 253.0  # >= flagged "effectively white"
+    blur_laplacian_max: float = 100.0  # < flagged "blurry"
+    low_entropy_max: float = 1.0  # < flagged "low information"
+    min_dimension_px: int = 32  # min(width,height) < flagged "too small"
 
 
 @dataclass
 class ThumbnailSettings:
     """Thumbnail generation + caching (Module B)."""
 
-    max_edge: int = 256                  # longest edge in pixels
-    jpeg_quality: int = 80               # cache format quality
+    max_edge: int = 256  # longest edge in pixels
+    jpeg_quality: int = 80  # cache format quality
     cache_dir: Path = field(default_factory=lambda: DEFAULT_THUMBNAIL_DIR)
 
 
@@ -65,8 +65,8 @@ class AppConfig:
     data_dir: Path = field(default_factory=lambda: DEFAULT_DATA_DIR)
     thumbnails: ThumbnailSettings = field(default_factory=ThumbnailSettings)
     thresholds: QualityThresholds = field(default_factory=QualityThresholds)
-    scan_batch_size: int = 500           # rows per DB commit during scanning
-    browser_page_size: int = 60          # thumbnails per browser page
+    scan_batch_size: int = 500  # rows per DB commit during scanning
+    browser_page_size: int = 60  # thumbnails per browser page
 
     def ensure_dirs(self) -> None:
         """Create data + thumbnail directories if missing. Safe to call repeatedly."""

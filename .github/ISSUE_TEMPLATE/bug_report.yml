@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a problem with Vision Dataset Explorer
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps, dataset shape, and the command or UI action used.
+      placeholder: |
+        1. Scan directory '...'
+        2. Open Dataset Browser
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / traceback
+      description: Paste any error output. Will be rendered as code.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Environment
+      description: OS, Python version, and how you installed (pip / source).
+      placeholder: "Windows 11, Python 3.11, pip install -r requirements.txt"
+    validations:
+      required: true

@@ -22,8 +22,20 @@ log = get_logger(__name__)
 
 # Columns written per image row, in bind order.
 _IMAGE_COLUMNS = (
-    "rel_path", "abs_path", "filename", "ext", "size_bytes", "width", "height",
-    "mode", "aspect_ratio", "mtime", "class_label", "corrupt", "error", "scanned_at",
+    "rel_path",
+    "abs_path",
+    "filename",
+    "ext",
+    "size_bytes",
+    "width",
+    "height",
+    "mode",
+    "aspect_ratio",
+    "mtime",
+    "class_label",
+    "corrupt",
+    "error",
+    "scanned_at",
 )
 
 _UPSERT_SQL = f"""
@@ -103,9 +115,7 @@ class Repository:
         Loaded once per scan so the scanner can skip unchanged files in memory
         without a per-file database round-trip.
         """
-        rows = self._conn.execute(
-            "SELECT rel_path, size_bytes, mtime FROM images"
-        ).fetchall()
+        rows = self._conn.execute("SELECT rel_path, size_bytes, mtime FROM images").fetchall()
         return {r["rel_path"]: (r["size_bytes"], r["mtime"]) for r in rows}
 
     def upsert_images(self, metas: Iterable[ImageMetadata], batch_size: int = 500) -> int:
@@ -126,9 +136,20 @@ class Repository:
         for m in metas:
             batch.append(
                 (
-                    m.rel_path, m.abs_path, m.filename, m.ext, m.size_bytes,
-                    m.width, m.height, m.mode, m.aspect_ratio, m.mtime,
-                    m.class_label, int(m.corrupt), m.error, now,
+                    m.rel_path,
+                    m.abs_path,
+                    m.filename,
+                    m.ext,
+                    m.size_bytes,
+                    m.width,
+                    m.height,
+                    m.mode,
+                    m.aspect_ratio,
+                    m.mtime,
+                    m.class_label,
+                    int(m.corrupt),
+                    m.error,
+                    now,
                 )
             )
             if len(batch) >= batch_size:
@@ -146,9 +167,7 @@ class Repository:
             for i in range(0, len(rel_paths), 500):
                 chunk = rel_paths[i : i + 500]
                 placeholders = ",".join("?" for _ in chunk)
-                cur = conn.execute(
-                    f"DELETE FROM images WHERE rel_path IN ({placeholders})", chunk
-                )
+                cur = conn.execute(f"DELETE FROM images WHERE rel_path IN ({placeholders})", chunk)
                 deleted += cur.rowcount
         return deleted
 
@@ -161,9 +180,7 @@ class Repository:
 
     def count_corrupt(self) -> int:
         return int(
-            self._conn.execute(
-                "SELECT COUNT(*) AS n FROM images WHERE corrupt = 1"
-            ).fetchone()["n"]
+            self._conn.execute("SELECT COUNT(*) AS n FROM images WHERE corrupt = 1").fetchone()["n"]
         )
 
     def list_classes(self) -> list[tuple[str, int]]:
@@ -172,21 +189,16 @@ class Repository:
         Flat-dataset images (no class) are grouped under the label ``None``.
         """
         rows = self._conn.execute(
-            "SELECT class_label, COUNT(*) AS n FROM images "
-            "GROUP BY class_label ORDER BY n DESC"
+            "SELECT class_label, COUNT(*) AS n FROM images GROUP BY class_label ORDER BY n DESC"
         ).fetchall()
         return [(r["class_label"], r["n"]) for r in rows]
 
     def total_size_bytes(self) -> int:
-        row = self._conn.execute(
-            "SELECT COALESCE(SUM(size_bytes), 0) AS s FROM images"
-        ).fetchone()
+        row = self._conn.execute("SELECT COALESCE(SUM(size_bytes), 0) AS s FROM images").fetchone()
         return int(row["s"])
 
     def get_image(self, image_id: int) -> sqlite3.Row | None:
-        return self._conn.execute(
-            "SELECT * FROM images WHERE id = ?", (image_id,)
-        ).fetchone()
+        return self._conn.execute("SELECT * FROM images WHERE id = ?", (image_id,)).fetchone()
 
     def iter_images(self, limit: int | None = None, offset: int = 0) -> list[sqlite3.Row]:
         sql = "SELECT * FROM images ORDER BY rel_path"
@@ -240,10 +252,14 @@ class Repository:
             params.append(f"%{name}%")
 
         for key, col, op in (
-            ("min_width", "width", ">="), ("max_width", "width", "<="),
-            ("min_height", "height", ">="), ("max_height", "height", "<="),
-            ("min_size", "size_bytes", ">="), ("max_size", "size_bytes", "<="),
-            ("min_aspect", "aspect_ratio", ">="), ("max_aspect", "aspect_ratio", "<="),
+            ("min_width", "width", ">="),
+            ("max_width", "width", "<="),
+            ("min_height", "height", ">="),
+            ("max_height", "height", "<="),
+            ("min_size", "size_bytes", ">="),
+            ("max_size", "size_bytes", "<="),
+            ("min_aspect", "aspect_ratio", ">="),
+            ("max_aspect", "aspect_ratio", "<="),
         ):
             val = f.get(key)
             if val is not None:
@@ -267,23 +283,18 @@ class Repository:
         """
         where, params = self._build_filters(filters)
         total = int(
-            self._conn.execute(
-                f"SELECT COUNT(*) AS n FROM images{where}", params
-            ).fetchone()["n"]
+            self._conn.execute(f"SELECT COUNT(*) AS n FROM images{where}", params).fetchone()["n"]
         )
         order_expr = self._SORT_EXPR.get(sort, self._SORT_EXPR["name"])
         direction = "DESC" if descending else "ASC"
         rows = self._conn.execute(
-            f"SELECT * FROM images{where} ORDER BY {order_expr} {direction}, id "
-            f"LIMIT ? OFFSET ?",
+            f"SELECT * FROM images{where} ORDER BY {order_expr} {direction}, id LIMIT ? OFFSET ?",
             [*params, limit, offset],
         ).fetchall()
         return rows, total
 
     def distinct_exts(self) -> list[str]:
-        rows = self._conn.execute(
-            "SELECT DISTINCT ext FROM images ORDER BY ext"
-        ).fetchall()
+        rows = self._conn.execute("SELECT DISTINCT ext FROM images ORDER BY ext").fetchall()
         return [r["ext"] for r in rows]
 
     def count_by_ext(self) -> list[tuple[str, int]]:

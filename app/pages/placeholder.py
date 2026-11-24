@@ -13,8 +13,10 @@ _REPO_ISSUES = "https://github.com/tempoo04/image-inspector/issues"
 
 def render(title: str, issue: int, summary: str, points: list[str]) -> None:
     st.header(title)
-    st.info(f"Planned module — not yet implemented. Tracked in "
-            f"[issue #{issue}]({_REPO_ISSUES}/{issue}).")
+    st.info(
+        f"Planned module — not yet implemented. Tracked in "
+        f"[issue #{issue}]({_REPO_ISSUES}/{issue})."
+    )
     st.write(summary)
     if points:
         st.markdown("**Planned capabilities:**")
