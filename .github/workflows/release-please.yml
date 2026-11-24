@@ -1,8 +1,9 @@
 name: release-please
 
 # Maintains a release PR that accumulates changes; merging it tags a release,
-# updates CHANGELOG.md, and bumps the version. Version tags then trigger the
-# Docker publish workflow.
+# updates CHANGELOG.md, and bumps the version. When a release is created, the
+# Docker image is published in the same workflow run (so GITHUB_TOKEN can
+# trigger it — a token-pushed tag would not trigger a separate workflow).
 on:
   push:
     branches: [main]
@@ -14,8 +15,22 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: rp
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  publish-docker:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-publish.yml
+    with:
+      ref: ${{ needs.release-please.outputs.tag_name }}
