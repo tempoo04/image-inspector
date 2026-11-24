@@ -11,12 +11,22 @@ the remaining pages show a tracked "planned" notice.
 
 from __future__ import annotations
 
-import streamlit as st
+import sys
+from pathlib import Path
 
-from app.context import get_config, open_repo
-from app.pages import browser, overview, placeholder
-from app.ui_utils import human_bytes
-from core.scanner import scan_dataset
+# `streamlit run app/main.py` puts this file's own directory (app/) on sys.path,
+# not the project root, so the `app`/`core`/`database` packages are not
+# importable by default. Add the repository root (parent of app/) up front.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+import streamlit as st  # noqa: E402  (import after sys.path bootstrap)
+
+from app.context import get_config, open_repo  # noqa: E402
+from app.pages import browser, overview, placeholder  # noqa: E402
+from app.ui_utils import human_bytes  # noqa: E402
+from core.scanner import scan_dataset  # noqa: E402
 
 PAGE_ORDER = [
     "Overview",
