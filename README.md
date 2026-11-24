@@ -76,6 +76,18 @@ streamlit run app/main.py
 python -m app.launcher --scan data/sample
 ```
 
+## Run with Docker
+
+A container image is published to GHCR on each release:
+
+```bash
+docker run --rm -p 8501:8501 \
+  -v /path/to/your/images:/data \
+  ghcr.io/tempoo04/image-inspector:latest
+```
+
+Then open <http://localhost:8501> and point the app at `/data`.
+
 ## Running tests
 
 ```bash
