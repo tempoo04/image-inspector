@@ -107,6 +107,11 @@ def _sidebar(cfg) -> None:
     if st.sidebar.button("Scan / rescan", type="primary", width="stretch"):
         _run_scan(cfg, st.session_state.dataset_root, prune)
 
+    # Self-contained demo: generate a small synthetic dataset and scan it.
+    # Handy for the hosted demo, where no local dataset is present.
+    if st.sidebar.button("Generate demo dataset", width="stretch"):
+        _generate_demo(cfg, st.session_state.dataset_root)
+
     # Catalog status line.
     with open_repo(cfg) as repo:
         n = repo.count_images()
@@ -140,6 +145,18 @@ def _run_scan(cfg, root: str, prune: bool) -> None:
     for k in ("browser_page", "browser_sig", "selected_ids", "detail_id"):
         st.session_state.pop(k, None)
     st.rerun()
+
+
+def _generate_demo(cfg, root: str) -> None:
+    """Generate a small synthetic dataset at *root*, then scan it."""
+    from examples.make_synthetic import generate
+
+    try:
+        generate(root, per_class=12)
+    except OSError as exc:
+        st.sidebar.error(f"Could not generate demo data: {exc}")
+        return
+    _run_scan(cfg, root, prune=False)
 
 
 def _dispatch(page: str, repo, cfg) -> None:
