@@ -30,21 +30,21 @@ def render(repo: Repository, cfg: AppConfig) -> None:
     c1.metric("Images", f"{total:,}")
     c2.metric("Classes", n_classes if n_classes else "—")
     c3.metric("Total size", human_bytes(repo.total_size_bytes()))
-    c4.metric("Corrupt", corrupt, delta=None if corrupt == 0 else "needs review",
-              delta_color="inverse")
+    c4.metric(
+        "Corrupt", corrupt, delta=None if corrupt == 0 else "needs review", delta_color="inverse"
+    )
 
     st.divider()
     left, right = st.columns(2)
 
     with left:
         st.subheader("Images per class")
-        df = pd.DataFrame(
-            [(class_display(c), n) for c, n in classes], columns=["class", "count"]
-        )
+        df = pd.DataFrame([(class_display(c), n) for c, n in classes], columns=["class", "count"])
         fig = px.bar(df, x="class", y="count")
-        fig.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0),
-                          xaxis_title=None, yaxis_title=None)
-        st.plotly_chart(fig, width='stretch')
+        fig.update_layout(
+            height=320, margin=dict(l=0, r=0, t=10, b=0), xaxis_title=None, yaxis_title=None
+        )
+        st.plotly_chart(fig, width="stretch")
 
         if n_classes >= 2:
             counts = [n for c, n in classes if c]
@@ -56,14 +56,14 @@ def render(repo: Repository, cfg: AppConfig) -> None:
         fdf = pd.DataFrame(repo.count_by_ext(), columns=["format", "count"])
         fig2 = px.pie(fdf, names="format", values="count", hole=0.4)
         fig2.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig2, width='stretch')
+        st.plotly_chart(fig2, width="stretch")
 
     st.divider()
     st.subheader("Jump to")
     s1, s2, _ = st.columns(3)
-    if s1.button("🖼️  Browse images", width='stretch'):
+    if s1.button("🖼️  Browse images", width="stretch"):
         st.session_state.page = "Dataset Browser"
         st.rerun()
-    if s2.button("📊  Statistics", width='stretch'):
+    if s2.button("📊  Statistics", width="stretch"):
         st.session_state.page = "Statistics"
         st.rerun()

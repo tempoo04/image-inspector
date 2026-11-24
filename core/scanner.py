@@ -27,13 +27,13 @@ class ScanResult:
     """Summary of one scan pass."""
 
     root: str
-    layout: str                 # "class-based" | "flat" | "mixed" | "empty"
-    total_files: int = 0        # supported image files found on disk
-    processed: int = 0          # files for which metadata was (re)extracted
-    written: int = 0            # rows inserted or updated
+    layout: str  # "class-based" | "flat" | "mixed" | "empty"
+    total_files: int = 0  # supported image files found on disk
+    processed: int = 0  # files for which metadata was (re)extracted
+    written: int = 0  # rows inserted or updated
     skipped_unchanged: int = 0  # files skipped by incremental check
-    corrupt: int = 0            # files flagged unreadable during this pass
-    deleted: int = 0            # stale rows pruned (if prune_missing)
+    corrupt: int = 0  # files flagged unreadable during this pass
+    deleted: int = 0  # stale rows pruned (if prune_missing)
     duration_s: float = 0.0
 
 
@@ -148,8 +148,13 @@ def scan_dataset(
     result.duration_s = round(time.time() - start, 3)
     log.info(
         "Scan complete: %s layout=%s written=%d skipped=%d corrupt=%d deleted=%d in %.2fs",
-        root, result.layout, result.written, result.skipped_unchanged,
-        result.corrupt, result.deleted, result.duration_s,
+        root,
+        result.layout,
+        result.written,
+        result.skipped_unchanged,
+        result.corrupt,
+        result.deleted,
+        result.duration_s,
     )
     return result
 

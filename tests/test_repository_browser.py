@@ -11,20 +11,31 @@ from database.repository import Repository
 def _meta(rel, *, ext=".png", size=100, w=10, h=10, cls=None, corrupt=False):
     aspect = round(w / h, 6) if w and h else None
     return ImageMetadata(
-        abs_path=f"/abs/{rel}", rel_path=rel, filename=rel.split("/")[-1], ext=ext,
-        size_bytes=size, mtime=1.0, width=w, height=h, mode="RGB",
-        aspect_ratio=aspect, class_label=cls, corrupt=corrupt,
+        abs_path=f"/abs/{rel}",
+        rel_path=rel,
+        filename=rel.split("/")[-1],
+        ext=ext,
+        size_bytes=size,
+        mtime=1.0,
+        width=w,
+        height=h,
+        mode="RGB",
+        aspect_ratio=aspect,
+        class_label=cls,
+        corrupt=corrupt,
     )
 
 
 def _seed(repo: Repository):
-    repo.upsert_images([
-        _meta("cat/a.png", ext=".png", size=100, w=64, h=64, cls="cat"),
-        _meta("cat/b.jpg", ext=".jpg", size=300, w=128, h=64, cls="cat"),
-        _meta("dog/c.png", ext=".png", size=200, w=200, h=200, cls="dog"),
-        _meta("dog/d.jpg", ext=".jpg", size=500, w=32, h=64, cls="dog"),
-        _meta("dog/bad.jpg", ext=".jpg", size=10, w=None, h=None, cls="dog", corrupt=True),
-    ])
+    repo.upsert_images(
+        [
+            _meta("cat/a.png", ext=".png", size=100, w=64, h=64, cls="cat"),
+            _meta("cat/b.jpg", ext=".jpg", size=300, w=128, h=64, cls="cat"),
+            _meta("dog/c.png", ext=".png", size=200, w=200, h=200, cls="dog"),
+            _meta("dog/d.jpg", ext=".jpg", size=500, w=32, h=64, cls="dog"),
+            _meta("dog/bad.jpg", ext=".jpg", size=10, w=None, h=None, cls="dog", corrupt=True),
+        ]
+    )
 
 
 def test_filter_by_class(tmp_path: Path):

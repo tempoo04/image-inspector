@@ -10,9 +10,17 @@ from database.repository import Repository
 
 def _meta(rel: str, size: int = 100, mtime: float = 1.0, cls: str | None = None) -> ImageMetadata:
     return ImageMetadata(
-        abs_path=f"/abs/{rel}", rel_path=rel, filename=rel.split("/")[-1],
-        ext=".png", size_bytes=size, mtime=mtime, width=10, height=5,
-        mode="RGB", aspect_ratio=2.0, class_label=cls,
+        abs_path=f"/abs/{rel}",
+        rel_path=rel,
+        filename=rel.split("/")[-1],
+        ext=".png",
+        size_bytes=size,
+        mtime=mtime,
+        width=10,
+        height=5,
+        mode="RGB",
+        aspect_ratio=2.0,
+        class_label=cls,
     )
 
 
@@ -55,11 +63,13 @@ def test_delete_by_rel_paths(tmp_path: Path):
 
 def test_class_and_size_aggregates(tmp_path: Path):
     with Repository(tmp_path / "t.db") as repo:
-        repo.upsert_images([
-            _meta("cat/a.png", size=10, cls="cat"),
-            _meta("cat/b.png", size=20, cls="cat"),
-            _meta("dog/c.png", size=30, cls="dog"),
-        ])
+        repo.upsert_images(
+            [
+                _meta("cat/a.png", size=10, cls="cat"),
+                _meta("cat/b.png", size=20, cls="cat"),
+                _meta("dog/c.png", size=30, cls="dog"),
+            ]
+        )
         assert repo.total_size_bytes() == 60
         classes = dict(repo.list_classes())
         assert classes["cat"] == 2
