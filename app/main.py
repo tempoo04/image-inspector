@@ -24,7 +24,7 @@ if str(_REPO_ROOT) not in sys.path:
 import streamlit as st
 
 from app.context import get_config, open_repo
-from app.pages import browser, overview, placeholder
+from app.pages import browser, image_quality, overview, placeholder, statistics
 from app.ui_utils import human_bytes
 from core.scanner import scan_dataset
 
@@ -41,25 +41,6 @@ PAGE_ORDER = [
 
 # title -> (issue number, one-line summary, planned bullet points)
 _PLACEHOLDERS = {
-    "Statistics": (
-        3,
-        "Dataset-wide statistics and distributions.",
-        [
-            "Resolution / aspect / format / file-size distributions",
-            "Min / max / mean / median dimensions",
-            "Class-imbalance indicators",
-            "CSV export",
-        ],
-    ),
-    "Image Quality": (
-        4,
-        "Per-image quality metrics with configurable thresholds.",
-        [
-            "Brightness, contrast, sharpness, entropy",
-            "RGB channel stats + histograms",
-            "Flags: black/white, dark/bright, blurry, small",
-        ],
-    ),
     "Image Comparison": (
         5,
         "Side-by-side comparison of two or more images.",
@@ -164,6 +145,10 @@ def _dispatch(page: str, repo, cfg) -> None:
         overview.render(repo, cfg)
     elif page == "Dataset Browser":
         browser.render(repo, cfg)
+    elif page == "Statistics":
+        statistics.render(repo, cfg)
+    elif page == "Image Quality":
+        image_quality.render(repo, cfg)
     else:
         issue, summary, points = _PLACEHOLDERS[page]
         placeholder.render(page, issue, summary, points)

@@ -325,3 +325,126 @@ class Repository:
             "size": (row["smin"], row["smax"]),
             "aspect": (row["amin"], row["amax"]),
         }
+
+    # -- quality metrics (Module D) -----------------------------------------
+    _METRIC_FLAGS = ("is_black", "is_white", "is_dark", "is_bright", "is_blurry", "is_small")
+
+    def images_without_metrics(self) -> list[sqlite3.Row]:
+        """Non-corrupt images that have no metrics row yet (batch work list)."""
+        return self._conn.execute(
+            "SELECT i.* FROM images i LEFT JOIN metrics m ON m.image_id = i.id "
+            "WHERE m.image_id IS NULL AND i.corrupt = 0 ORDER BY i.id"
+        ).fetchall()
+
+    def count_with_metrics(self) -> int:
+        return int(self._conn.execute("SELECT COUNT(*) AS n FROM metrics").fetchone()["n"])
+
+    def count_without_metrics(self) -> int:
+        return int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM images i LEFT JOIN metrics m ON m.image_id = i.id "
+                "WHERE m.image_id IS NULL AND i.corrupt = 0"
+            ).fetchone()["n"]
+        )
+
+    def upsert_metrics_many(self, items: "list[tuple[int, object]]") -> int:
+        """Insert/replace metrics for ``(image_id, ImageQualityMetrics)`` pairs."""
+        now = time.time()
+        sql = """
+        INSERT INTO metrics (
+            image_id, brightness, contrast, sharpness, entropy,
+            mean_r, mean_g, mean_b,
+            is_black, is_white, is_dark, is_bright, is_blurry, is_small, computed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(image_id) DO UPDATE SET
+            brightness=excluded.brightness, contrast=excluded.contrast,
+            sharpness=excluded.sharpness, entropy=excluded.entropy,
+            mean_r=excluded.mean_r, mean_g=excluded.mean_g, mean_b=excluded.mean_b,
+            is_black=excluded.is_black, is_white=excluded.is_white,
+            is_dark=excluded.is_dark, is_bright=excluded.is_bright,
+            is_blurry=excluded.is_blurry, is_small=excluded.is_small,
+            computed_at=excluded.computed_at;
+        """
+        rows = [
+            (
+                img_id,
+                m.brightness,
+                m.contrast,
+                m.sharpness,
+                m.entropy,
+                m.mean_r,
+                m.mean_g,
+                m.mean_b,
+                int(m.is_black),
+                int(m.is_white),
+                int(m.is_dark),
+                int(m.is_bright),
+                int(m.is_blurry),
+                int(m.is_small),
+                now,
+            )
+            for img_id, m in items
+        ]
+        if not rows:
+            return 0
+        with self._tx() as conn:
+            conn.executemany(sql, rows)
+        return len(rows)
+
+    def get_metrics(self, image_id: int) -> sqlite3.Row | None:
+        return self._conn.execute(
+            "SELECT * FROM metrics WHERE image_id = ?", (image_id,)
+        ).fetchone()
+
+    def clear_metrics(self) -> int:
+        """Delete all computed metrics (e.g. before a forced recompute)."""
+        with self._tx() as conn:
+            cur = conn.execute("DELETE FROM metrics")
+        return cur.rowcount
+
+    def metric_flag_counts(self) -> dict[str, int]:
+        """Count of images flagged by each quality flag."""
+        cols = ", ".join(f"COALESCE(SUM({f}), 0) AS {f}" for f in self._METRIC_FLAGS)
+        row = self._conn.execute(f"SELECT {cols} FROM metrics").fetchone()
+        return {f: int(row[f]) for f in self._METRIC_FLAGS}
+
+    def metrics_joined(self) -> list[sqlite3.Row]:
+        """Metrics joined with image dimensions/class for stats and CSV export."""
+        return self._conn.execute(
+            "SELECT i.rel_path, i.filename, i.class_label, i.ext, i.width, i.height, "
+            "i.aspect_ratio, i.size_bytes, m.brightness, m.contrast, m.sharpness, "
+            "m.entropy, m.mean_r, m.mean_g, m.mean_b, m.is_black, m.is_white, "
+            "m.is_dark, m.is_bright, m.is_blurry, m.is_small "
+            "FROM metrics m JOIN images i ON i.id = m.image_id ORDER BY i.rel_path"
+        ).fetchall()
+
+    def flagged_images(self, flag: str) -> list[sqlite3.Row]:
+        """Images carrying a given quality flag (validated against known flags)."""
+        if flag not in self._METRIC_FLAGS:
+            raise ValueError(f"Unknown flag: {flag}")
+        return self._conn.execute(
+            f"SELECT i.* FROM metrics m JOIN images i ON i.id = m.image_id "
+            f"WHERE m.{flag} = 1 ORDER BY i.rel_path"
+        ).fetchall()
+
+    def dimension_stats(self) -> dict[str, float] | None:
+        """Min/max/mean/median of width and height over non-corrupt images."""
+        rows = self._conn.execute(
+            "SELECT width, height FROM images WHERE corrupt = 0 AND width IS NOT NULL"
+        ).fetchall()
+        if not rows:
+            return None
+        import statistics
+
+        widths = [r["width"] for r in rows]
+        heights = [r["height"] for r in rows]
+        return {
+            "width_min": min(widths),
+            "width_max": max(widths),
+            "width_mean": round(statistics.mean(widths), 1),
+            "width_median": statistics.median(widths),
+            "height_min": min(heights),
+            "height_max": max(heights),
+            "height_mean": round(statistics.mean(heights), 1),
+            "height_median": statistics.median(heights),
+        }
