@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/tempoo04/image-inspector/compare/v0.3.0...v0.4.0) (2026-11-25)
+
+
+### Features
+
+* add Statistics and Image Quality pages (Modules C, D) ([f345309](https://github.com/tempoo04/image-inspector/commit/f3453098b645f3af5cef2e2f30a63074bd5e66cb))
+* add Statistics and Image Quality pages (Modules C, D) ([c2d5a0a](https://github.com/tempoo04/image-inspector/commit/c2d5a0ade8eb3bc7bc97f0a609326a933203f75a))
+
 ## [0.3.0](https://github.com/tempoo04/image-inspector/compare/v0.2.0...v0.3.0) (2026-11-24)
 
 
