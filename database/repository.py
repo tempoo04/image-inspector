@@ -519,3 +519,62 @@ class Repository:
         out = list(groups.values())
         out.sort(key=lambda g: (-len(g), g[0]["rel_path"]))
         return out
+
+    # -- embeddings (Module G) ----------------------------------------------
+    def images_without_embeddings(self, model_name: str) -> list[sqlite3.Row]:
+        """Non-corrupt images with no embedding for *model_name* (batch work list)."""
+        return self._conn.execute(
+            "SELECT i.* FROM images i "
+            "LEFT JOIN embeddings e ON e.image_id = i.id AND e.model_name = ? "
+            "WHERE e.image_id IS NULL AND i.corrupt = 0 ORDER BY i.id",
+            (model_name,),
+        ).fetchall()
+
+    def count_with_embeddings(self, model_name: str) -> int:
+        return int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM embeddings WHERE model_name = ?", (model_name,)
+            ).fetchone()["n"]
+        )
+
+    def count_without_embeddings(self, model_name: str) -> int:
+        return int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM images i "
+                "LEFT JOIN embeddings e ON e.image_id = i.id AND e.model_name = ? "
+                "WHERE e.image_id IS NULL AND i.corrupt = 0",
+                (model_name,),
+            ).fetchone()["n"]
+        )
+
+    def upsert_embeddings_many(self, model_name: str, items: "list[tuple[int, bytes, int]]") -> int:
+        """Insert/replace embeddings for ``(image_id, vector_blob, dim)`` tuples."""
+        now = time.time()
+        sql = """
+        INSERT INTO embeddings (image_id, model_name, dim, vector, computed_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(image_id, model_name) DO UPDATE SET
+            dim=excluded.dim, vector=excluded.vector, computed_at=excluded.computed_at;
+        """
+        rows = [(img_id, model_name, dim, vector, now) for img_id, vector, dim in items]
+        if not rows:
+            return 0
+        with self._tx() as conn:
+            conn.executemany(sql, rows)
+        return len(rows)
+
+    def clear_embeddings(self, model_name: str) -> int:
+        """Delete all embeddings for *model_name* (e.g. before a forced recompute)."""
+        with self._tx() as conn:
+            cur = conn.execute("DELETE FROM embeddings WHERE model_name = ?", (model_name,))
+        return cur.rowcount
+
+    def embedding_rows(self, model_name: str) -> list[sqlite3.Row]:
+        """Image rows joined with their stored vector, for projection/similarity."""
+        return self._conn.execute(
+            "SELECT i.id, i.rel_path, i.abs_path, i.filename, i.mtime, i.class_label, "
+            "i.size_bytes, e.vector, e.dim "
+            "FROM embeddings e JOIN images i ON i.id = e.image_id "
+            "WHERE e.model_name = ? ORDER BY i.id",
+            (model_name,),
+        ).fetchall()

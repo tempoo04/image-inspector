@@ -28,6 +28,7 @@ from app.pages import (
     browser,
     comparison,
     duplicates,
+    embeddings,
     image_quality,
     overview,
     placeholder,
@@ -49,11 +50,6 @@ PAGE_ORDER = [
 
 # title -> (issue number, one-line summary, planned bullet points)
 _PLACEHOLDERS = {
-    "Embedding Visualization": (
-        7,
-        "Deep-feature embeddings and 2D projection.",
-        ["ResNet18 / DINOv2 embeddings", "PCA / UMAP / t-SNE", "Similarity search"],
-    ),
     "Export and Cleaning": (
         8,
         "Build cleaned datasets and reports.",
@@ -147,6 +143,8 @@ def _dispatch(page: str, repo, cfg) -> None:
         comparison.render(repo, cfg)
     elif page == "Duplicate Detection":
         duplicates.render(repo, cfg)
+    elif page == "Embedding Visualization":
+        embeddings.render(repo, cfg)
     else:
         issue, summary, points = _PLACEHOLDERS[page]
         placeholder.render(page, issue, summary, points)
