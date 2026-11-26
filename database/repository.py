@@ -448,3 +448,74 @@ class Repository:
             "height_mean": round(statistics.mean(heights), 1),
             "height_median": statistics.median(heights),
         }
+
+    # -- hashes (Module F) ---------------------------------------------------
+    def images_without_hashes(self) -> list[sqlite3.Row]:
+        """Non-corrupt images that have no hashes row yet (batch work list)."""
+        return self._conn.execute(
+            "SELECT i.* FROM images i LEFT JOIN hashes h ON h.image_id = i.id "
+            "WHERE h.image_id IS NULL AND i.corrupt = 0 ORDER BY i.id"
+        ).fetchall()
+
+    def count_with_hashes(self) -> int:
+        return int(self._conn.execute("SELECT COUNT(*) AS n FROM hashes").fetchone()["n"])
+
+    def count_without_hashes(self) -> int:
+        return int(
+            self._conn.execute(
+                "SELECT COUNT(*) AS n FROM images i LEFT JOIN hashes h ON h.image_id = i.id "
+                "WHERE h.image_id IS NULL AND i.corrupt = 0"
+            ).fetchone()["n"]
+        )
+
+    def upsert_hashes_many(self, items: "list[tuple[int, object]]") -> int:
+        """Insert/replace hashes for ``(image_id, ImageHashes)`` pairs."""
+        now = time.time()
+        sql = """
+        INSERT INTO hashes (image_id, sha256, phash, computed_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(image_id) DO UPDATE SET
+            sha256=excluded.sha256, phash=excluded.phash, computed_at=excluded.computed_at;
+        """
+        rows = [(img_id, h.sha256, h.phash, now) for img_id, h in items]
+        if not rows:
+            return 0
+        with self._tx() as conn:
+            conn.executemany(sql, rows)
+        return len(rows)
+
+    def get_hashes(self, image_id: int) -> sqlite3.Row | None:
+        return self._conn.execute("SELECT * FROM hashes WHERE image_id = ?", (image_id,)).fetchone()
+
+    def clear_hashes(self) -> int:
+        """Delete all computed hashes (e.g. before a forced recompute)."""
+        with self._tx() as conn:
+            cur = conn.execute("DELETE FROM hashes")
+        return cur.rowcount
+
+    def hashed_images(self) -> list[sqlite3.Row]:
+        """Image rows joined with their pHash, for near-duplicate clustering."""
+        return self._conn.execute(
+            "SELECT i.*, h.phash FROM hashes h JOIN images i ON i.id = h.image_id "
+            "WHERE h.phash IS NOT NULL ORDER BY i.id"
+        ).fetchall()
+
+    def exact_duplicate_groups(self) -> list[list[sqlite3.Row]]:
+        """Groups of images sharing an identical sha256 (exact byte duplicates).
+
+        Only groups of two or more are returned, largest first; within a group,
+        images are ordered by ``rel_path`` so the first is a stable "keep" pick.
+        """
+        dup_rows = self._conn.execute(
+            "SELECT i.*, h.sha256 FROM hashes h JOIN images i ON i.id = h.image_id "
+            "WHERE h.sha256 IN ("
+            "  SELECT sha256 FROM hashes WHERE sha256 IS NOT NULL "
+            "  GROUP BY sha256 HAVING COUNT(*) > 1"
+            ") ORDER BY h.sha256, i.rel_path"
+        ).fetchall()
+        groups: dict[str, list[sqlite3.Row]] = {}
+        for row in dup_rows:
+            groups.setdefault(row["sha256"], []).append(row)
+        out = list(groups.values())
+        out.sort(key=lambda g: (-len(g), g[0]["rel_path"]))
+        return out

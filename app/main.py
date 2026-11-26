@@ -24,7 +24,15 @@ if str(_REPO_ROOT) not in sys.path:
 import streamlit as st
 
 from app.context import get_config, open_repo
-from app.pages import browser, image_quality, overview, placeholder, statistics
+from app.pages import (
+    browser,
+    comparison,
+    duplicates,
+    image_quality,
+    overview,
+    placeholder,
+    statistics,
+)
 from app.ui_utils import human_bytes
 from core.scanner import scan_dataset
 
@@ -41,20 +49,6 @@ PAGE_ORDER = [
 
 # title -> (issue number, one-line summary, planned bullet points)
 _PLACEHOLDERS = {
-    "Image Comparison": (
-        5,
-        "Side-by-side comparison of two or more images.",
-        ["Synchronized zoom", "Overlaid histograms", "Absolute pixel-difference images"],
-    ),
-    "Duplicate Detection": (
-        6,
-        "Find exact and near-duplicate images.",
-        [
-            "sha256 exact match",
-            "Perceptual hash (pHash)",
-            "Grouped manual review — never auto-delete",
-        ],
-    ),
     "Embedding Visualization": (
         7,
         "Deep-feature embeddings and 2D projection.",
@@ -149,6 +143,10 @@ def _dispatch(page: str, repo, cfg) -> None:
         statistics.render(repo, cfg)
     elif page == "Image Quality":
         image_quality.render(repo, cfg)
+    elif page == "Image Comparison":
+        comparison.render(repo, cfg)
+    elif page == "Duplicate Detection":
+        duplicates.render(repo, cfg)
     else:
         issue, summary, points = _PLACEHOLDERS[page]
         placeholder.render(page, issue, summary, points)
