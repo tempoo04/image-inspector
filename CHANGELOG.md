@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/tempoo04/image-inspector/compare/v0.4.0...v0.5.0) (2026-11-26)
+
+
+### Features
+
+* add Image Comparison and Duplicate Detection (Modules E, F) ([7d9f3f4](https://github.com/tempoo04/image-inspector/commit/7d9f3f4628a7f42e983a9a46e8f46527697a2a8c))
+* add Image Comparison and Duplicate Detection (Modules E, F) ([a8ac151](https://github.com/tempoo04/image-inspector/commit/a8ac151425f137781a67957c137903c1b837f8e1))
+
 ## [0.4.0](https://github.com/tempoo04/image-inspector/compare/v0.3.0...v0.4.0) (2026-11-25)
 
 
