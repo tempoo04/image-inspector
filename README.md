@@ -17,9 +17,9 @@ uploads.
 *Generate demo dataset* in the sidebar to explore a sample.
 
 > **Status:** Runnable. Scanner + SQLite indexing, the interactive browser, a
-> statistics dashboard, image-quality analysis, side-by-side comparison, and
-> exact + near-duplicate detection are done. Remaining analysis modules are
-> tracked in the
+> statistics dashboard, image-quality analysis, side-by-side comparison,
+> exact + near-duplicate detection, and deep-feature embedding visualization
+> are done. Export is the remaining module — tracked in the
 > [issue tracker](https://github.com/tempoo04/image-inspector/issues).
 
 ## Architecture
@@ -104,7 +104,7 @@ The project is built in incremental, independently testable stages:
 2. **Browser** — Streamlit UI, thumbnail cache, pagination, filtering, sorting. ✅
 3. **Statistics & quality** — image metrics, interactive charts, batch processing. ✅
 4. **Comparison & duplicates** — side-by-side view, exact + perceptual hashing. ✅
-5. **Embeddings** — optional deep features, PCA/UMAP, similarity search.
+5. **Embeddings** — optional deep features, PCA/UMAP, similarity search. ✅
 6. **Export** — filtered dataset copies, CSV/PDF reports, cross-platform checks.
 
 Contributions are welcome at any stage — see the
