@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/tempoo04/image-inspector/compare/v0.5.0...v0.6.0) (2026-11-27)
+
+
+### Features
+
+* add Embedding Visualization (Module G) ([b8be6a5](https://github.com/tempoo04/image-inspector/commit/b8be6a53a962135fe66e9fd6fc65c8d0d37cc254))
+* add Embedding Visualization (Module G) ([9e8b5ef](https://github.com/tempoo04/image-inspector/commit/9e8b5efa9f84135e542b7850a8f5723f4f45ce4f))
+
 ## [0.5.0](https://github.com/tempoo04/image-inspector/compare/v0.4.0...v0.5.0) (2026-11-26)
 
 
